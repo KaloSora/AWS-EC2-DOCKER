@@ -8,3 +8,5 @@ aws_subnet_id      = ["subnet-00628a1a4aa10b3c6"]
 
 # EC2 Instance variables
 ec2_key_name = "ec2-docker-key"
+ec2_instance_type = "t5.xlarge"
+ec2_ssh_inbound_cidr = ["0.0.0.0/8"] # Provide your local IP

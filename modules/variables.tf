@@ -19,7 +19,17 @@ variable "aws_subnet_id" {
   description = "AWS subnet IDs"
 }
 
+variable "ec2_instance_type" {
+  type = string
+  description = "AWS EC2 instance type"
+}
+
 variable "ec2_key_name" {
   type = string
   description = "AWS EC2 key name"
+}
+
+variable "ec2_ssh_inbound_cidr" {
+  type = list(string)
+  description = "AWS EC2 SSH inbound CIDR"
 }
