@@ -4,7 +4,6 @@
 # For secret key, it will read from ~/.aws/credentials file
 provider "aws" {
   region  = "ap-northeast-1"
-  profile = "default"  
 }
 
 terraform {
