@@ -18,3 +18,8 @@ variable "aws_subnet_id" {
   type = list(string)
   description = "AWS subnet IDs"
 }
+
+variable "ec2_key_name" {
+  type = string
+  description = "AWS EC2 key name"
+}

@@ -69,6 +69,7 @@ terraform init -backend-config="bucket=795359014551-terraform-state"
 ```
 
 8. Create EC2
+Run terraform script to create AWS EC2.
 ```
-terraform apply -target=module.ec2-docker -var-file="aws-docker.tfvars"
-```
+terraform apply -target=module.ec2-docker -var-file="./aws-docker.tfvars"
+``` 
