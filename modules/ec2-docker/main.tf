@@ -82,5 +82,7 @@ resource "aws_instance" "ec2_docker_instance" {
               yum install -y git htop
               timedatectl set-timezone Asia/Shanghai
 
+              mkdir -p /opt/app/docker
+
               EOF
 }
