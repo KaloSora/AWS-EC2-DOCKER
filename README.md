@@ -76,9 +76,6 @@ terraform apply -target=module.ec2-docker -var-file="./aws-docker.tfvars" --auto
 
 # Destroy EC2
 terraform destroy -target=module.ec2-docker -var-file="./aws-docker.tfvars" --auto-approve
-
-# Connect to EC2
-ssh -i ec2-docker/ssh_key/ec2-key.pem ec2-user@your_ip
 ``` 
 
 Reference: EC2 stop / start by id
