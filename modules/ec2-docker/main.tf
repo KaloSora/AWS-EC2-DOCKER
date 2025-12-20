@@ -127,10 +127,13 @@ resource "null_resource" "ssh_connection" {
     inline = [
       "cd ${local.ec2_home_dir}",
       "chmod +x docker_setup.sh",
-      "sh docker_setup.sh",
+
       # FIXME: For Debug
-      "echo 'Deployment completed at $(date)' > /tmp/deployment.log",
-      "ls -la ${local.ec2_home_dir}/docker_setup.sh >> /tmp/deployment.log"
+      "echo 'Deployment completed at $(date)' > /tmp/docker-deployment.log",
+      "ls -la ${local.ec2_home_dir}/docker_setup.sh >> /tmp/docker-deployment.log",
+
+      # Run the setup script
+      "sh docker_setup.sh >> /tmp/docker-deployment.log"
     ]
   }
 }
