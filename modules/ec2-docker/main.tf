@@ -111,8 +111,8 @@ resource "null_resource" "ssh_connection" {
   # Local-exec provisioner to run commands on your local machine
   provisioner "local-exec" {
     command = <<-EOT
-    "echo 'EC2 Instance IP: ${aws_instance.ec2_docker_instance.public_ip}'"
-    "echo 'EC2 ID: ${aws_instance.ec2_docker_instance.id}'"
+        echo "EC2 Instance IP: ${aws_instance.ec2_docker_instance.public_ip}"
+        echo "EC2 ID: ${aws_instance.ec2_docker_instance.id}"
     EOT
   }
 
