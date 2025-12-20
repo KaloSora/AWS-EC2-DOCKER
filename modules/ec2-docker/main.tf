@@ -82,13 +82,14 @@ resource "aws_instance" "ec2_docker_instance" {
   }
   
   user_data = <<-EOF
-              #!/bin/bash
-              yum install -y git htop
-              timedatectl set-timezone Asia/Shanghai
+            #!/bin/bash
+            yum install -y git htop
+            timedatectl set-timezone Asia/Shanghai
 
-              sudo ec2-user -i mkdir -p ${local.ec2_home_dir}
-
-              EOF
+            mkdir -p ${local.ec2_home_dir}
+            chown -R ec2-user:ec2-user ${local.ec2_home_dir}
+            chmod 755 ${local.ec2_home_dir}
+        EOF
 }
 
 # TODO Add System Manager to manager EC2
