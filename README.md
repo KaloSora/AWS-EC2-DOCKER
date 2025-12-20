@@ -71,7 +71,14 @@ terraform init -backend-config="bucket=795359014551-terraform-state"
 8. Create EC2
 Run terraform script to create AWS EC2.
 ```
-terraform apply -target=module.ec2-docker -var-file="./aws-docker.tfvars"
+# Create EC2
+terraform apply -target=module.ec2-docker -var-file="./aws-docker.tfvars" --auto-approve
+
+# Destroy EC2
+terraform destroy -target=module.ec2-docker -var-file="./aws-docker.tfvars" --auto-approve
+
+# Connect to EC2
+ssh -i ec2-docker/ssh_key/ec2-key.pem ec2-user@54.249.161.123
 ``` 
 
 Reference: EC2 stop / start by id

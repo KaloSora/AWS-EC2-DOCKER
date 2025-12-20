@@ -85,10 +85,13 @@ resource "aws_instance" "ec2_docker_instance" {
               yum install -y git htop
               timedatectl set-timezone Asia/Shanghai
 
-              mkdir -p ${local.ec2_home_dir}
+              sudo ec2-user -i mkdir -p ${local.ec2_home_dir}
 
               EOF
 }
+
+# TODO Add System Manager to manager EC2
+
 
 # Setup the EC2
 resource "null_resource" "ssh_connection" {
