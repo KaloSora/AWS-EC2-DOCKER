@@ -129,7 +129,7 @@ resource "null_resource" "ssh_connection" {
       "chmod +x docker_setup.sh",
 
       # FIXME: For Debug
-      "echo 'Deployment completed at $(date)' > /tmp/docker-deployment.log",
+      "echo 'Start docker deployment at $(date)' > /tmp/docker-deployment.log",
       "ls -la ${local.ec2_home_dir}/docker_setup.sh >> /tmp/docker-deployment.log",
 
       # Run the setup script
