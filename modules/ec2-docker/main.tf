@@ -6,6 +6,8 @@ locals {
   ec2_key_filename = "${path.module}/ssh_key/ec2-key.pem"
   ec2_key_filename_pub = "${path.module}/ssh_key/ec2-key.pub"
   ec2_home_dir = "/opt/app/docker"
+
+  ec2_docker_script = "docker-setup.sh"
 }
 
 # Create EC2 key pair
@@ -118,22 +120,22 @@ resource "null_resource" "ssh_connection" {
 
   # Local script upload
   provisioner "file" {
-    source      = "${path.module}/script/docker_setup.sh"
-    destination = "${local.ec2_home_dir}/docker_setup.sh"
+    source      = "${path.module}/script/${local.ec2_docker_script}"
+    destination = "${local.ec2_home_dir}/${local.ec2_docker_script}"
   }
 
   # Remote-exec provisioner to run commands on the EC2 instance via SSH
   provisioner "remote-exec" {
     inline = [
       "cd ${local.ec2_home_dir}",
-      "chmod +x docker_setup.sh",
+      "chmod +x ${local.ec2_docker_script}",
 
       # FIXME: For Debug
       "echo 'Start docker deployment at $(date)' > /tmp/docker-deployment.log",
-      "ls -la ${local.ec2_home_dir}/docker_setup.sh >> /tmp/docker-deployment.log",
+      "ls -la ${local.ec2_home_dir}/${local.ec2_docker_script} >> /tmp/docker-deployment.log",
 
       # Run the setup script
-      "sh docker_setup.sh >> /tmp/docker-deployment.log"
+      "sh ${local.ec2_docker_script} >> /tmp/docker-deployment.log"
     ]
   }
 }
