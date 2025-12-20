@@ -62,6 +62,34 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
+# Add System Manager to manager EC2
+resource "aws_iam_role" "ssm_role" {
+  name = "terraform-ec2-ssm-role-${local.ec2_timestamp}"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_managed" {
+  role       = aws_iam_role.ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_instance_profile" "ssm_instance_profile" {
+  name = "SSMInstanceProfile"
+  role = aws_iam_role.ssm_role.name
+}
+
 # Create EC2 instance
 resource "aws_instance" "ec2_docker_instance" {
   ami                    = data.aws_ami.latest_rhel8.id
@@ -69,6 +97,9 @@ resource "aws_instance" "ec2_docker_instance" {
   key_name               = aws_key_pair.generated_key.key_name
   vpc_security_group_ids = [aws_security_group.allow_ssh.id]
   subnet_id              = var.ec2_subnet_id[0]
+  
+  # Attach IAM role for SSM
+  iam_instance_profile   = aws_iam_instance_profile.ssm_instance_profile.name
 
   root_block_device {
     volume_size = 50
@@ -84,11 +115,20 @@ resource "aws_instance" "ec2_docker_instance" {
             #!/bin/bash
             yum install -y git htop
             timedatectl set-timezone Asia/Shanghai
+
+            # SSM Agent install
+            sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+            sudo systemctl start amazon-ssm-agent
+            sudo systemctl enable amazon-ssm-agent
+            sudo systemctl status amazon-ssm-agent
+
+            # CloudWatch Agent install
+            sudo yum install -y amazon-cloudwatch-agent
+            sudo systemctl start amazon-cloudwatch-agent
+            sudo systemctl enable amazon-cloudwatch-agent
+            sudo systemctl status amazon-cloudwatch-agent
         EOF
 }
-
-# TODO Add System Manager to manager EC2
-
 
 # Setup the EC2
 resource "null_resource" "ssh_connection" {
