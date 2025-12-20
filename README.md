@@ -73,3 +73,9 @@ Run terraform script to create AWS EC2.
 ```
 terraform apply -target=module.ec2-docker -var-file="./aws-docker.tfvars"
 ``` 
+
+Reference: EC2 stop / start by id
+```
+aws ec2 stop-instances --instance-ids your_instance_id
+aws ec2 start-instances --instance-ids your_instance_id
+```
