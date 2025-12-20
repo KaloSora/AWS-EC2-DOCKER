@@ -6,6 +6,7 @@ locals {
   ec2_key_filename = "${path.module}/ssh_key/ec2-key.pem"
   ec2_key_filename_pub = "${path.module}/ssh_key/ec2-key.pub"
   ec2_home_dir = "/opt/app/docker"
+  ec2_timestamp = formatdate("YYYYMMDDHHmmss", timestamp())
 
   ec2_docker_script = "docker-setup.sh"
 }
@@ -39,7 +40,7 @@ resource "aws_key_pair" "generated_key" {
 
 # Create security group to allow SSH
 resource "aws_security_group" "allow_ssh" {
-  name        = "ssh-enabled-sg"
+  name        = "terraform-ssh-enabled-sg-${local.ec2_timestamp}"
   description = "Allow SSH inbound traffic"
   
   ingress {
