@@ -5,7 +5,6 @@
 locals {
   ec2_key_filename = "${path.module}/ssh_key/ec2-key.pem"
   ec2_key_filename_pub = "${path.module}/ssh_key/ec2-key.pub"
-  ec2_home_dir = "/opt/app/docker"
   ec2_timestamp = formatdate("YYYYMMDDHHmmss", timestamp())
 
   ec2_docker_script = "docker-setup.sh"
@@ -85,10 +84,6 @@ resource "aws_instance" "ec2_docker_instance" {
             #!/bin/bash
             yum install -y git htop
             timedatectl set-timezone Asia/Shanghai
-
-            mkdir -p ${local.ec2_home_dir}
-            chown -R ec2-user:ec2-user ${local.ec2_home_dir}
-            chmod 755 ${local.ec2_home_dir}
         EOF
 }
 
@@ -120,27 +115,27 @@ resource "null_resource" "ssh_connection" {
     command = <<-EOT
         echo "EC2 Instance IP: ${aws_instance.ec2_docker_instance.public_ip}"
         echo "EC2 ID: ${aws_instance.ec2_docker_instance.id}"
+        echo "Use the command to connect: ssh -i ec2-docker/ssh_key/ec2-key.pem ec2-user@${aws_instance.ec2_docker_instance.public_ip}"
     EOT
   }
 
-  # Local script upload
+  # Local script upload with terraform template file
   provisioner "file" {
     source      = "${path.module}/script/${local.ec2_docker_script}"
-    destination = "${local.ec2_home_dir}/${local.ec2_docker_script}"
+    destination = "/tmp/${local.ec2_docker_script}"
   }
 
   # Remote-exec provisioner to run commands on the EC2 instance via SSH
   provisioner "remote-exec" {
     inline = [
-      "cd ${local.ec2_home_dir}",
-      "chmod +x ${local.ec2_docker_script}",
+      "chmod +x /tmp/${local.ec2_docker_script}",
 
       # FIXME: For Debug
       "echo 'Start docker deployment at $(date)' > /tmp/docker-deployment.log",
-      "ls -la ${local.ec2_home_dir}/${local.ec2_docker_script} >> /tmp/docker-deployment.log",
+      "ls -la /tmp/${local.ec2_docker_script} >> /tmp/docker-deployment.log",
 
       # Run the setup script
-      "sh ${local.ec2_docker_script} >> /tmp/docker-deployment.log"
+      "sh /tmp/${local.ec2_docker_script} >> /tmp/docker-deployment.log"
     ]
   }
 }
