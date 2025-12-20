@@ -5,6 +5,7 @@
 locals {
   ec2_key_filename = "${path.module}/ssh_key/ec2-key.pem"
   ec2_key_filename_pub = "${path.module}/ssh_key/ec2-key.pub"
+  ec2_home_dir = "/opt/app/docker"
 }
 
 # Create EC2 key pair
@@ -25,7 +26,7 @@ resource "local_file" "ec2_private_key" {
 
 # Upload public key to AWS
 resource "aws_key_pair" "generated_key" {
-  key_name   = "my-ec2-key"
+  key_name   = "ec2-docker-key"
   public_key = tls_private_key.ec2_key.public_key_openssh
   
   tags = {
@@ -82,7 +83,54 @@ resource "aws_instance" "ec2_docker_instance" {
               yum install -y git htop
               timedatectl set-timezone Asia/Shanghai
 
-              mkdir -p /opt/app/docker
+              mkdir -p ${local.ec2_home_dir}
 
               EOF
+}
+
+# Setup the EC2
+resource "null_resource" "ssh_connection" {
+
+  # No need to set depends_on actually because the resource refer to the public ip already
+  # Just a safety measure
+  depends_on = [ aws_instance.ec2_docker_instance ]
+  
+  # Condition: once instance id changes, this module will re-run
+  triggers = {
+    instance_id = aws_instance.ec2_docker_instance.id
+  }
+
+  connection {
+    type        = "ssh"
+    host        = aws_instance.ec2_docker_instance.public_ip
+    user        = "ec2-user" # For AWS RHEL AMI
+    private_key = tls_private_key.ec2_key.private_key_pem
+    timeout     = "2m"
+  }
+
+  # Local-exec provisioner to run commands on your local machine
+  provisioner "local-exec" {
+    command = <<-EOT
+    "echo 'EC2 Instance IP: ${aws_instance.ec2_docker_instance.public_ip}'"
+    "echo 'EC2 ID: ${aws_instance.ec2_docker_instance.id}'"
+    EOT
+  }
+
+  # Local script upload
+  provisioner "file" {
+    source      = "${path.module}/script/docker_setup.sh"
+    destination = "${local.ec2_home_dir}/docker_setup.sh"
+  }
+
+  # Remote-exec provisioner to run commands on the EC2 instance via SSH
+  provisioner "remote-exec" {
+    inline = [
+      "cd ${local.ec2_home_dir}",
+      "chmod +x docker_setup.sh",
+      "sh docker_setup.sh",
+      # FIXME: For Debug
+      "echo 'Deployment completed at $(date)' > /tmp/deployment.log",
+      "ls -la ${local.ec2_home_dir}/docker_setup.sh >> /tmp/deployment.log"
+    ]
+  }
 }
