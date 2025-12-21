@@ -1,6 +1,8 @@
 # Purpose
 This repository mainly use terraform to create AWS EC2 and deploy Docker.
 
+[My Blog - AWS and Dcoker](https://kalosora.github.io/2025/12/21/AWS-and-Docker/)
+
 # Usage
 1. AWS login with CLI
 ```
