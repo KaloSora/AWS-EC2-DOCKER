@@ -1,0 +1,18 @@
+FROM ubuntu:22.04
+
+# Set as non-interactive
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install stress-ng
+RUN apt-get update && \
+    apt-get install -y \
+    stress-ng \
+    htop \
+    sysstat \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Health check command
+CMD ["stress-ng", "--version"]
