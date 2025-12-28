@@ -1,0 +1,17 @@
+FROM eclipse-temurin:17-jdk-alpine
+
+# Install Maven - Alpine Linux using apk
+RUN apk add --no-cache maven
+
+# Maven verify
+RUN mvn -v
+
+# Set working directory and copy source code
+WORKDIR /opt/app/docker
+COPY pom.xml .
+COPY src ./src
+
+# Mvn compile
+RUN mvn clean package -DskipTests
+
+ENTRYPOINT ["java", "-jar", "target/java-docker-demo-1.0.0.jar"]
