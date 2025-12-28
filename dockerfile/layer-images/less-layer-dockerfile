@@ -1,0 +1,13 @@
+FROM debian:latest
+
+WORKDIR /app
+
+# Reduce layer
+RUN apt-get update && apt-get install -y python3 && apt-get install -y wget
+
+# Move COPY to a separate layer
+# If there are changes in source code, only this layer will be rebuilt
+# It can reuse previous layers cache for apt-get commands
+COPY . .
+
+CMD ["python3", "app.py"]
